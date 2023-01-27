@@ -1,13 +1,13 @@
 import React, { Component } from "react";
 
 import classes from "./Modal.module.css";
-import Aux from "../../../hoc/Layout/Auxiliary/Auxiliary";
+import Aux from "../../../hoc/Auxiliary/Auxiliary";
 import Backdrop from "../Backdrop/Backdrop";
 
 class Modal extends Component {
     // You can use PureComponent to not re-render any component (Pure components checks all conditions to not re-render any component until it really needs to be.)
     shouldComponentUpdate( nextProps, nextState ) {
-        return nextProps.show !== this.props.show;
+        return nextProps.show !== this.props.show || nextProps.children !== this.props.children;
     }
 
     render () {
