@@ -5,12 +5,13 @@ import ReactDOM from "react-dom/client";
 import './index.css';
 import App from './App';
 import registerServiceWorker from './registerServiceWorker';
+import { BrowserRouter } from 'react-router-dom';
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
-// https://react-my-builder-70-default-rtdb.firebaseio.com/
+
 root.render(
     <React.StrictMode>
-      <App />
+        <BrowserRouter><App /></BrowserRouter>
     </React.StrictMode>
   );
   
