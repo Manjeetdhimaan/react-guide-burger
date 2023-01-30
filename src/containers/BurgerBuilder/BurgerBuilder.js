@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+import { createSearchParams, useNavigate } from 'react-router-dom';
 
 import Aux from "../../hoc/Auxiliary/Auxiliary";
 import Burger from "../../components/Burger/Burger";
@@ -8,7 +9,6 @@ import OrderSummary from "../../components/Burger/OrderSummary/OrderSummary";
 import Spinner from "../../components/UI/Spinner/Spinner";
 import withErrorHandler from "../../hoc/withErrorHandler/withErrorHandler";
 import axios from "../../axios-orders";
-import { useNavigate } from 'react-router-dom';
 
 const INGREDIENT_PRICES = {
     cheese: 0.5,
@@ -18,26 +18,22 @@ const INGREDIENT_PRICES = {
 };
 
 const burgerBuilder = (props) => {
-    const [state, setState] = React.useState({
-        ingredients: null,
-        totalPrice: 4,
-        purchasable: false,
-        purchasing: false,
-        isLoading: false,
-        isError: false
-    })
+    const [ingredients, setIngredients] = React.useState(null);
+    const [totalPrice, setTotalPrice] = React.useState(4);
+    const [purchasable, setPurchasable] = React.useState(false);
+    const [purchasing, setPurchasing] = React.useState(false);
+    const [isLoading, setIsLoading] = React.useState(false);
+    const [isError, setIsError] = React.useState(false);
+    const navigate = useNavigate();
 
     useEffect(() => {
-        
-        setState({...state, isLoading: true});
+        setIsLoading(true);
         axios.get('/ingredients.json').then(res => {
-            setState({
-                ...state,
-                ingredients: res['data'],
-                isLoading: false
-            })
+            setIsLoading(false);
+            setIngredients(res['data']);
         }).catch(err => {
-            setState({ ...state, isLoading: false, isError: true})
+            setIsLoading(false)
+            setIsError(true)
         })
     }, [])
 
@@ -48,96 +44,75 @@ const burgerBuilder = (props) => {
         }).reduce((sum, el) => {
             return sum + el
         }, 0);
-     
-        this.setState({ ...state, purchasable: sum > 0 })
+
+        setPurchasable(sum > 0)
     }
 
     const addIngredientHandler = (type) => {
-        const oldCount = state.ingredients[type];
+        const oldCount = ingredients[type];
         const updatedCount = oldCount + 1;
         const updatedIngredients = {
-            ...state.ingredients
+            ...ingredients
         }
         updatedIngredients[type] = updatedCount;
 
         const priceAddition = INGREDIENT_PRICES[type];
-        const oldPrice = state.totalPrice;
+        const oldPrice = totalPrice;
         const newPrice = oldPrice + priceAddition;
 
-        const sum = Object.keys(updatedIngredients)
-        .map(igKey => {
-            return updatedIngredients[igKey];
-        }).reduce((sum, el) => {
-            return sum + el
-        }, 0);
-
-        setState({ ...state, totalPrice: newPrice, ingredients: updatedIngredients, purchasable: sum > 0  });
-        // updatedPurchaseState(updatedIngredients);
+        setTotalPrice(newPrice);
+        setIngredients(updatedIngredients);
+        updatedPurchaseState(updatedIngredients);
     }
 
     const removeIngredientHandler = (type) => {
-        const oldCount = state.ingredients[type];
+        const oldCount = ingredients[type];
         if (oldCount <= 0) {
             return;
         }
         const updatedCount = oldCount - 1;
         const updatedIngredients = {
-            ...state.ingredients
+            ...ingredients
         }
         updatedIngredients[type] = updatedCount;
 
         const priceSubtraction = INGREDIENT_PRICES[type];
-        const oldPrice = state.totalPrice;
+        const oldPrice = totalPrice;
         const newPrice = oldPrice - priceSubtraction;
 
-        const sum = Object.keys(updatedIngredients)
-        .map(igKey => {
-            return updatedIngredients[igKey];
-        }).reduce((sum, el) => {
-            return sum + el
-        }, 0);
-
-        setState({ ...state, totalPrice: newPrice, ingredients: updatedIngredients, purchasable: sum > 0 });
-        // updatedPurchaseState(updatedIngredients);
+       
+        setTotalPrice(newPrice);
+        
+        setIngredients(updatedIngredients);
+        updatedPurchaseState(updatedIngredients);
+        // setState({ ...state, totalPrice: newPrice, ingredients: updatedIngredients, purchasable: sum > 0 });
     }
 
     const purchaseHandler = () => {
-        setState({ ...state, purchasing: true })
+        setPurchasing(true);
     }
 
     const purchaseCancleHandler = () => {
-        setState({...state, purchasing: false })
+        setPurchasing(false);
     }
-
-    const navigate = useNavigate();
-    const purchaseContinueHandler =() =>{
-        navigate('/checkout');
-        // setState({isLoading: true});
-        // const order = {
-        //     ingredients: state.ingredients,
-        //     price: state.totalPrice,
-        //     customer: {
-        //         name: 'Manjeet Singh',
-        //         address: {
-        //             street: 'Gali no 8',
-        //             zipCode: '160055',
-        //             country: 'India'
-        //         },
-        //         email: 'mani@mani.com'
-        //     },
-        //     deliveryMethod: 'fastest'
-        // }
-        // axios.post('/orders.json', order).then(res => {
-        //     setState({isLoading: false, purchasing: false});
-        // }).catch(err => {
-        //     setState({isLoading: false, purchasing: false});
-        //     console.log(err);
-        // });
+    
+    const purchaseContinueHandler = () => {
+        const queryParams = [];
+        for (let ingd in ingredients){
+            queryParams.push(encodeURIComponent(ingd) + '=' + encodeURIComponent(ingredients[ingd]));
+        }
+        queryParams.push('price=' + totalPrice);
+        const queryString = queryParams.join('&');
         
+        navigate({
+            pathname: "/checkout",
+            search: createSearchParams(queryString).toString()
+        });
+        // navigate('/checkout?' + queryString);    
     }
 
         const disabledInfo = {
-            ...state.ingredients
+            ...ingredients
         }
 
         for(let key in disabledInfo) {
@@ -146,36 +121,36 @@ const burgerBuilder = (props) => {
 
         let orderSummary = null;       
         
-        let burger = state.isError ? <p>Ingredients can't be loaded!</p> : <Spinner />;
-        if (state.ingredients) {
+        let burger = isError ? <p>Ingredients can't be loaded!</p> : <Spinner />;
+        if (ingredients) {
             burger = (
                 <Aux>
-                    <Burger ingredients={state.ingredients}/>
+                    <Burger ingredients={ingredients}/>
                     <BuildControls 
                         ingredientAdded={addIngredientHandler} 
                         ingredientRemoved={removeIngredientHandler} 
                         disabled={disabledInfo} 
-                        price={state.totalPrice} 
-                        purchasable={state.purchasable} 
+                        price={totalPrice} 
+                        purchasable={purchasable} 
                         ordered={purchaseHandler} />
                 </Aux>
             )
 
             orderSummary = <OrderSummary 
-                                ingredients={state.ingredients} 
+                                ingredients={ingredients} 
                                 continuePurchase={purchaseContinueHandler}
                                 canclePurchase={purchaseCancleHandler}
-                                price={state.totalPrice}
+                                price={totalPrice}
                             />;
         }
 
-        if (state.isLoading) {
+        if (isLoading) {
             orderSummary = <Spinner />
         }
 
         return (
             <Aux>
-                <Modal show={state.purchasing} modalClosed={purchaseCancleHandler}>
+                <Modal show={purchasing} modalClosed={purchaseCancleHandler}>
                     {orderSummary}
                 </Modal>
                 {burger}
@@ -225,7 +200,6 @@ export default withErrorHandler(burgerBuilder, axios);
 //             })
 //         }).catch(err => {
 //             this.setState({isLoading: false, isError: true})
-            
 //         })
 //     }
 
@@ -246,7 +220,6 @@ export default withErrorHandler(burgerBuilder, axios);
 //             ...this.state.ingredients
 //         }
 //         updatedIngredients[type] = updatedCount;
-
 //         const priceAddition = INGREDIENT_PRICES[type];
 //         const oldPrice = this.state.totalPrice;
 //         const newPrice = oldPrice + priceAddition;
