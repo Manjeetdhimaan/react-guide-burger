@@ -6,6 +6,7 @@ import classes from "./ContactData.module.css";
 import axios from "../../../axios-orders";
 import Spinner from "../../../components/UI/Spinner/Spinner";
 import Input from "../../../components/UI/Input/Input";
+import { connect } from "react-redux";
  
 class ContactData extends React.Component {
     state = {
@@ -46,7 +47,8 @@ class ContactData extends React.Component {
                 validation: {
                     required: true,
                     minLength: 5,
-                    maxLength: 5
+                    maxLength: 5,
+                    isNumeric: true
                 },
                 valid: false,
                 touched: false
@@ -72,7 +74,8 @@ class ContactData extends React.Component {
                 },
                 value: '',
                 validation: {
-                    required: true
+                    required: true,
+                    isEmail: true
                 },
                 valid: false,
                 touched: false
@@ -98,6 +101,10 @@ class ContactData extends React.Component {
 
     checkOrderFormValidity = (value, validators) => {
         let isValid = true;
+        if (!validators) {
+            return true;
+        }
+
         if (validators){
             if(validators.required) {
                 isValid = (value.trim() !== '') && isValid;
@@ -110,8 +117,18 @@ class ContactData extends React.Component {
             if(validators.maxLength) {
                 isValid = value.trim().length <= validators.maxLength && isValid;
             }
+
+            if (validators.isEmail) {
+                const pattern = /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/;
+                isValid = pattern.test(value) && isValid
+            }
+    
+            if (validators.isNumeric) {
+                const pattern = /^\d+$/;
+                isValid = pattern.test(value) && isValid
+            }
+    
         }
-        
         return isValid;
     }
 
@@ -127,8 +144,8 @@ class ContactData extends React.Component {
         }
         this.setState({isLoading: true});
         const order = {
-            ingredients: this.props.location.state.ingredients,
-            price: this.props.location.state.totalPrice,
+            ingredients: this.props.ingds,
+            price: this.props.totalPrice,
             orderData: formData
             
         }
@@ -142,7 +159,6 @@ class ContactData extends React.Component {
     }
 
     inputChangedHandler = (event, inputIdentifier) => {
-      
         const updatedOrderForm = { ...this.state.orderForm };
         const updatedFormElement = { ...updatedOrderForm[inputIdentifier] };
         updatedFormElement.value = event.target.value;
@@ -159,7 +175,6 @@ class ContactData extends React.Component {
     }
 
     render() {
-
     const formElementsArray = [];
     for ( let key in this.state.orderForm ) {
         formElementsArray.push({
@@ -196,4 +211,11 @@ class ContactData extends React.Component {
     }
 }
 
-export default withRouter(ContactData);
+const mapStateToProps = state => {
+    return {
+        ingds: state.rootReducer.ingredients,
+        totalPrice: state.rootReducer.totalPrice
+    }
+}
+
+export default connect(mapStateToProps)(withRouter(ContactData));
