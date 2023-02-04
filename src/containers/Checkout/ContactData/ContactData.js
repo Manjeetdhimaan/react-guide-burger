@@ -181,7 +181,8 @@ class ContactData extends React.Component {
         let form = (
             <form onSubmit={this.orderHandler}>
                 {formElementsArray.map(formElement => {
-                    return <Input key={formElement.id} elementType={formElement.config.elementType}
+                    return <Input key={formElement.id}
+                        elementType={formElement.config.elementType}
                         elementConfig={formElement.config.elementConfig}
                         value={formElement.config.value}
                         invalid={!formElement.config.valid}

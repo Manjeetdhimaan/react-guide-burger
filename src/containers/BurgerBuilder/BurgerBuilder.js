@@ -20,7 +20,6 @@ class BurgerBuilder extends Component {
 
     async componentDidMount () {
         await this.props.onInItIngredients();
-        console.log(this.props)
         // this.setState({isLoading: true});
         // axios.get('/ingredients.json').then(res => {
         //     this.setState({

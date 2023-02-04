@@ -1,14 +1,19 @@
+// ingredients actions
 export const ADD_INGREDIENT = "ADD_INGREDIENT";
 export const REMOVE_INGREDIENT = "REMOVE_INGREDIENT";
 export const SET_INGREDIENT = "SET_INGREDIENT";
 export const FETCH_INGREDIENTS_FAILED = "FETCH_INGREDIENTS_FAILED";
 export const FETCH_INGREDIENTS_START = "FETCH_INGREDIENTS_START";
-
+// purchase burger actions
 export const PUCHASE_BURGER_SUCCESS = "PUCHASE_BURGER_SUCCESS";
 export const PUCHASE_BURGER_FAIL = "PUCHASE_BURGER_FAIL";
 export const PUCHASE_BURGER_START = "PUCHASE_BURGER_START";
 export const PURCHASE_INIT = "PURCHASE_INIT";
-
+// orders actions
 export const FETCH_ORDERS_START = "FETCH_ORDERS_START";
 export const FETCH_ORDERS_SUCCESS = "FETCH_ORDERS_SUCCESS";
 export const FETCH_ORDERS_FAIL = "FETCH_ORDERS_FAIL";
+// auth actions
+export const AUTH_START = "AUTH_START";
+export const AUTH_SUCCESS = "AUTH_SUCCESS";
+export const AUTH_FAIL = "AUTH_FAIL";
