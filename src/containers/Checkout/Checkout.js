@@ -1,29 +1,40 @@
 import React from "react";
 import { connect } from "react-redux";
-import { Outlet } from 'react-router-dom';
+import { Navigate, Outlet } from 'react-router-dom';
 
 import CheckoutSummary from "../../components/Order/CheckoutSummary/CheckoutSummary";
 import { withRouter } from "../../hoc/withRouter/withRouter";
 
 class Checkout extends React.Component {
 
-     checkoutCancelledHandler = () => {
+    checkoutCancelledHandler = () => {
         this.props.navigate(-1);
     }
 
-     checkoutContinuedHandler = () => {
+    checkoutContinuedHandler = () => {
         // this.props.navigate('contact-data', { state: {ingredients: this.props.ingds, totalPrice: this.props.totalPrice}, replace: true});
         this.props.navigate('contact-data');
     }
-    render () {
+
+    render() {
+        let summary = <Navigate to="/" />
+        if (this.props.ingds) {
+            const puchasedRedirect = this.props.purchased ? <Navigate to="/" /> : null;
+            summary = (
+                <React.Fragment>
+                    {puchasedRedirect}
+                    <CheckoutSummary
+                        checkoutCancelled={this.checkoutCancelledHandler}
+                        checkoutContinued={this.checkoutContinuedHandler}
+                        ingredients={this.props.ingds} />
+                </React.Fragment>
+            )
+        }
         return (
             <div>
-                <CheckoutSummary
-                 checkoutCancelled={this.checkoutCancelledHandler} 
-                 checkoutContinued={this.checkoutContinuedHandler} 
-                 ingredients={this.props.ingds} />
-                 <Outlet  />
-                 {/* <Routes>
+                {summary}
+                <Outlet />
+                {/* <Routes>
                     <Route path="/checkout/contact-data" element={<ContactData ingredients={ingredients} />} />
                  </Routes> */}
             </div>
@@ -32,7 +43,8 @@ class Checkout extends React.Component {
 }
 const mapStateToProps = state => {
     return {
-        ingds: state.rootReducer.ingredients
+        ingds: state.burgerBuilder.ingredients,
+        purchased: state.order.purchased
     }
 }
 
