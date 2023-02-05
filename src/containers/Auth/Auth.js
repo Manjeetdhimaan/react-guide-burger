@@ -1,12 +1,13 @@
 import React from "react";
 import { connect } from "react-redux";
+import { Navigate } from "react-router";
 
 import Input from "../../components/UI/Input/Input";
 import Button from "../../components/UI/Button/Button";
 import classes from "./Auth.module.css";
 import * as actions from "../../store/actions/index";
 import Spinner from "../../components/UI/Spinner/Spinner";
-import { Navigate } from "react-router";
+import { checkFormValidity } from "../../shared/utility";
 
 class Auth extends React.Component {
 
@@ -50,39 +51,6 @@ class Auth extends React.Component {
         }
     }
 
-    checkAuthFormValidity = (value, validators) => {
-        let isValid = true;
-        if (!validators) {
-            return true;
-        }
-
-        if (validators) {
-            if (validators.required) {
-                isValid = (value.trim() !== '') && isValid;
-            }
-
-            if (validators.minLength) {
-                isValid = value.trim().length >= validators.minLength && isValid;
-            }
-
-            if (validators.maxLength) {
-                isValid = value.trim().length <= validators.maxLength && isValid;
-            }
-
-            if (validators.isEmail) {
-                const pattern = /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/;
-                isValid = pattern.test(value) && isValid
-            }
-
-            if (validators.isNumeric) {
-                const pattern = /^\d+$/;
-                isValid = pattern.test(value) && isValid
-            }
-
-        }
-        return isValid;
-    }
-
     inputChangedHandler = (event, controlId) => {
         event.preventDefault();
         const updatedControls = {
@@ -90,7 +58,7 @@ class Auth extends React.Component {
             [controlId]: {
                 ...this.state.controls[controlId],
                 value: event.target.value,
-                valid: this.checkAuthFormValidity(event.target.value, this.state.controls[controlId].validation),
+                valid: checkFormValidity(event.target.value, this.state.controls[controlId].validation),
                 touched: true
             }
         }

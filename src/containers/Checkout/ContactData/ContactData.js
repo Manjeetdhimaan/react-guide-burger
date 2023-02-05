@@ -9,6 +9,7 @@ import { withRouter } from "../../../hoc/withRouter/withRouter";
 import withErrorHandler from "../../../hoc/withErrorHandler/withErrorHandler";
 import axios from "../../../axios-orders";
 import * as actions from "../../../store/actions/index";
+import { checkFormValidity } from "../../../shared/utility";
 
 class ContactData extends React.Component {
     state = {
@@ -99,40 +100,6 @@ class ContactData extends React.Component {
         isValidForm: false
     }
 
-
-    checkOrderFormValidity = (value, validators) => {
-        let isValid = true;
-        if (!validators) {
-            return true;
-        }
-
-        if (validators) {
-            if (validators.required) {
-                isValid = (value.trim() !== '') && isValid;
-            }
-
-            if (validators.minLength) {
-                isValid = value.trim().length >= validators.minLength && isValid;
-            }
-
-            if (validators.maxLength) {
-                isValid = value.trim().length <= validators.maxLength && isValid;
-            }
-
-            if (validators.isEmail) {
-                const pattern = /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/;
-                isValid = pattern.test(value) && isValid
-            }
-
-            if (validators.isNumeric) {
-                const pattern = /^\d+$/;
-                isValid = pattern.test(value) && isValid
-            }
-
-        }
-        return isValid;
-    }
-
     orderHandler = (e) => {
         e.preventDefault();
         if (!this.state.isValidForm) {
@@ -158,7 +125,7 @@ class ContactData extends React.Component {
         const updatedOrderForm = { ...this.state.orderForm };
         const updatedFormElement = { ...updatedOrderForm[inputIdentifier] };
         updatedFormElement.value = event.target.value;
-        updatedFormElement.valid = this.checkOrderFormValidity(updatedFormElement.value, updatedFormElement.validation);
+        updatedFormElement.valid = checkFormValidity(updatedFormElement.value, updatedFormElement.validation);
         updatedFormElement.touched = true;
         updatedOrderForm[inputIdentifier] = updatedFormElement;
 

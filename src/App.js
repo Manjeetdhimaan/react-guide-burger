@@ -4,19 +4,29 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 
 import Layout from "./hoc/Layout/Layout";
 import BurgerBuilder from './containers/BurgerBuilder/BurgerBuilder';
-import Checkout from './containers/Checkout/Checkout';
-import ContactData from './containers/Checkout/ContactData/ContactData';
-import Orders from './containers/Orders/Orders';
 import Auth from './containers/Auth/Auth';
 import Logout from './containers/Auth/Logout/Logout';
 import * as actions from "./store/actions/index";
 import Protected from './ProtectedRoutes/ProtectedRoutes';
+import asyncComponent from './hoc/asyncComponent/asyncComponent';
+
+const AsyncChechOut = asyncComponent(() => {
+  return import('./containers/Checkout/Checkout');
+});
+
+const AsyncContactData = asyncComponent(() => {
+  return import('./containers/Checkout/ContactData/ContactData');
+});
+
+const AsyncOrders = asyncComponent(() => {
+  return import('./containers/Orders/Orders');
+});
 
 class App extends Component {
   componentDidMount() {
     this.props.onTryAutoSignIn();
   }
-
+ 
   render() {
 
     // let routes = (
@@ -40,6 +50,7 @@ class App extends Component {
     //   );
     // }
 
+
     return (
       <div>
         <Layout>
@@ -47,11 +58,11 @@ class App extends Component {
             <Route path="/" exact element={<BurgerBuilder />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/orders" element={<Protected isAuthenticated={this.props.isAuthenticated}>
-                <Orders />
-              </Protected>} />
+              <AsyncOrders />
+            </Protected>} />
             <Route path="/logout" element={<Logout />} />
-            <Route path="/checkout" element={this.props.isAuthenticated ? <Checkout /> : <Navigate to="/auth" />}>
-              <Route index={true} path="contact-data" element={this.props.isAuthenticated ? <ContactData /> : <Navigate to="/auth" />} />
+            <Route path="/checkout" element={this.props.isAuthenticated ? <AsyncChechOut /> : <Navigate to="/auth" />}>
+              <Route index={true} path="contact-data" element={this.props.isAuthenticated ? <AsyncContactData /> : <Navigate to="/auth" />} />
             </Route>
             <Route path='*' render />
           </Routes>
