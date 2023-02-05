@@ -7,7 +7,7 @@ import BurgerBuilder from './containers/BurgerBuilder/BurgerBuilder';
 import Auth from './containers/Auth/Auth';
 import Logout from './containers/Auth/Logout/Logout';
 import * as actions from "./store/actions/index";
-import Protected from './ProtectedRoutes/ProtectedRoutes';
+import Protected from './shared/AuthGuard';
 import asyncComponent from './hoc/asyncComponent/asyncComponent';
 
 const AsyncChechOut = asyncComponent(() => {
